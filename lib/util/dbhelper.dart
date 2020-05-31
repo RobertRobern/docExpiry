@@ -1,19 +1,12 @@
 // Database access layer and helper functions
 import 'dart:io';
-
 import 'package:docExpiry/model/model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DbHelper {
-  // Intitalize the database(opens database and creates it if it doesnt exist)
-  Future<Database> initializeDb() async {
-    Directory documentDirectory = await getApplicationDocumentsDirectory();
-    String path = documentDirectory.path + "/docexpiry.db";
-    var db = await openDatabase(path, version: 1, onCreate: _createDb);
-    return db;
-  }
+  
 
   String docExpiration = 'expiration';
 // Fields of the 'docs' table
@@ -35,6 +28,9 @@ class DbHelper {
   static final DbHelper _dbHelper = DbHelper._internal();
 
 // Factory constructor
+factory DbHelper(){
+  return _dbHelper;
+}
   DbHelper._internal();
 
 // Get runtime refernce to the database and initialization
@@ -45,10 +41,18 @@ class DbHelper {
     return _db;
   }
 
+  // Intitalize the database(opens database and creates it if it doesnt exist)
+  Future<Database> initializeDb() async {
+    Directory documentDirectory = await getApplicationDocumentsDirectory();
+    String path = documentDirectory.path + "/docexpiry.db";
+    var db = await openDatabase(path, version: 1, onCreate: _createDb);
+    return db;
+  }
+
   // create database table
   void _createDb(Database db, int version) async {
     await db.execute(
-        "CEATE TABLE $tblDocs($docId INTEGER PRIMARY KEY, $docTitle TEXT, " +
+        "CREATE TABLE $tblDocs($docId INTEGER PRIMARY KEY, $docTitle TEXT, " +
             "$docExpiration TEXT, " +
             "$fqYear INTEGER, $fqHalfYear INTEGER, $fqQuarter INTEGER, " +
             "$fqMonth INTEGER)");
@@ -136,7 +140,7 @@ class DbHelper {
   // Delete all docs
   Future<int> deleteRows(String tbl) async {
     var database = await this.db;
-    int deleteRowsQuery = await database.delete("DELETE FROM $tbl");
+    int deleteRowsQuery = await database.rawDelete("DELETE FROM $tbl");
     return deleteRowsQuery;
   }
 }
